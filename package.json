@@ -1,11 +1,11 @@
 {
   "type": "module",
   "scripts": {
-    "test": "node ./test/test.js",
+    "test": "node ./code/test/test.js",
     "pub": "npm publish --access public"
   },
   "name": "@mcpher/code-locator",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "index.js",
   "description": "find the code at current place in js",
   "repository": "github:brucemcpherson/code-locator"
