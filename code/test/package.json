@@ -1,0 +1,11 @@
+{
+  "type": "module",
+  "scripts": {
+    "test": "node ./test.js"
+  },
+  "name": "test",
+  "version": "1.0.0",
+  "main": "test.js",
+  "description": "find the code at current place in js",
+  "repository": "github:brucemcpherson/code-locator"
+}
