@@ -1,5 +1,5 @@
 
-import { readFileSync } from 'fs'
+//import { readFileSync } from 'fs'
 
 /**
  * CodeLocation
@@ -303,4 +303,4 @@ const _CodeLocator = () => {
 }
 
 // apps script libraries sometime have trouble with exported consts, so we'll use var
-export var CodeLocator = _CodeLocator()
+var CodeLocator = _CodeLocator()

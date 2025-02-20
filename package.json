@@ -5,7 +5,7 @@
     "pub": "npm publish --access public"
   },
   "name": "@mcpher/code-locator",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "main": "./code/index.js",
   "description": "find the code at current place in js",
   "repository": "github:brucemcpherson/code-locator"

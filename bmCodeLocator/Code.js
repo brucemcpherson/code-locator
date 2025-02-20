@@ -1,5 +1,4 @@
-
-import { readFileSync } from 'fs'
+//import { readFileSync } from 'fs'
 
 /**
  * CodeLocation
@@ -41,6 +40,7 @@ const _CodeLocator = () => {
   // how to identify if we're using gas
   // need a better indicator TODO
   const isGas = Reflect.has(globalThis, 'ScriptApp') && typeof ScriptApp.getResource === 'function'
+  console.log ('isGas', isGas)
 
   // if there are multiple GAS libraries then a scriptId will be needed to distinguish files with the same name in cache
   
@@ -58,6 +58,7 @@ const _CodeLocator = () => {
    * @returns {string} the scriptId
    */
   const setScriptId = (scriptId) => {
+    console.log ('setting scriptid')
     if (isGas && typeof scriptId !== 'string') {
       throw `scriptId must be a string - you provided a ${typeof scriptId}`
     }
@@ -71,6 +72,7 @@ const _CodeLocator = () => {
    * @returns {function} the getResource function
    */
   const setGetResource = (getResource) => {
+   console.log ('setting getresource')
     if (isGas && typeof getResource !== 'function') {
       throw `getResource must be the ScriptApp.getResource function - you provided a ${typeof getResource}`
     }
@@ -86,6 +88,7 @@ const _CodeLocator = () => {
    * @returns {string} the callers scriptid if it was provided, otherwise 'default'
    */
   const getScriptId = () => _scriptId 
+  console.log (getScriptId(), getGetResource())
   //--------------------
 
   // the code is cached to avoide multiple fetching
@@ -289,7 +292,7 @@ const _CodeLocator = () => {
     return report 
   }
 
-  return {
+  const ex =  {
     whoCalled,
     getLocations,
     getCode,
@@ -300,7 +303,13 @@ const _CodeLocator = () => {
     setScriptId,
     getGetResource
   }
+
+  return ex
 }
 
-// apps script libraries sometime have trouble with exported consts, so we'll use var
-export var CodeLocator = _CodeLocator()
+var CodeLocator = _CodeLocator()
+
+
+
+
+

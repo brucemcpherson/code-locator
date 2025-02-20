@@ -33,9 +33,14 @@ import {CodeLocator} from '@mcpher/code-locator'
 Include this library - bmCodeLocator
 
 ```
-1WNOo3myA9LIQZSZ2qlaIc9rhUZoH1qsiFx2bW4hw6l1qj-SHW9YXZyFh
+14Je2i7tUrYJ7ZfAsKuaLQg72otSojKzaZpY7RmiIjqABoE-UdsgmslG9
 const {CodeLocator} = bmCodeLocator
+
+// see notes below for why....
+CodeLocator.setGetResource (ScriptApp.getResource)
 ````
+
+
 
 ## API
 
@@ -118,6 +123,69 @@ It uses a cache to store the code from files. This function will retrieve the co
 #### returns 
 
 [CodeContent](#codecontent) []
+
+
+## Additional methods to handle Google Apps Script ScriptApp
+
+This only applies to Apps Script. Ignored in Node.
+
+### setGetResource (ScriptApp.getResource)
+
+To retrieve the code for a script file, we use the (undocumented) ScriptApp.getResource function, which can only access code in its own project script. Since CodeLocator is implemented as a library, you need to pass a function it can use to retrieve code from your script. 
+
+After importing CodeLocator, but before doing anything else, you'll need to do this if you want to return the code associated with a line in your own script. This is optional - without it will still report the line number and file name info, but won't be able to reproduce the underlying code.
+
+
+````
+CodeLocator.setGetResource (getResourceFunction)
+````
+
+
+| parameter | type | default | description |
+| --------- | ---- | ------- | ----------- |
+|getResourceFunction|function|| Mandatory in Apps Script if you want code displayed - pass ScriptApp.getScriptId |
+
+#### returns
+
+function - the function you set
+
+### getGetResource (id)
+
+This only applies to Apps Script. Ignored in Node.
+
+
+#### returns
+
+function - the function you set
+
+### setScriptId (id)
+
+Only required for the edge case described below:
+
+In the unlikely event you are using multiple libraries and want to report on them too, AND those libraries happen to have scripts with the same name, you'll need to provide a scriptId as well as a getResource function so that the caching algorithm can distingush between them
+
+Remember also, the ScriptApp should belong to the script containing the code (which won't be yours if you are trying to extract code from a library so may not be available anyway)
+
+As follows - this is optional and to handle a very specific edge case.
+````
+CodeLocator.setScriptId (ScriptApp.getScriptId())
+````
+
+| parameter | type | default | description |
+| --------- | ---- | ------- | ----------- |
+|id|string|'default'| A unique id, preferably the scriptId returned by ScriptApp.getScriptId() |
+
+#### returns
+
+string - the scriptId you set
+
+### getScriptId (id)
+
+Only required for the edge case described at the beginning of these docs
+
+#### returns
+
+string - the scriptId you set with setScriptId
 
 ### Types
 

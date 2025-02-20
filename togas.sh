@@ -1,6 +1,6 @@
 # this simple script comments out the node import stuff 
 # and moves selected files recursively to a folder that can be moved to gas with clasp
-TARGET="gas"
+TARGET="bmCodeLocator"
 
 # Define the input folder
 SOURCE="code"
@@ -9,7 +9,7 @@ SOURCE="code"
 EXT="*.js"
 
 # whether to push with clasp
-CLASP=false
+CLASP=true
 
 # copy over all the files matching preservng the folder structure
 find "${SOURCE}" -name "${EXT}" -print | cpio -pvdum "${TARGET}"
