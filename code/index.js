@@ -19,7 +19,8 @@ import { readFileSync } from 'fs'
  * @property {boolean} [showLineNumber=true] whether to show line numbers
  * @property {boolean} [brief=false] brief only prints the target line and igmores sourround params and uses a concise format
  * @property {number}  [lineNumberWidth=4] width of line number space
- * @property {string} [pointer='--> '] point at target line
+ * @property {string} [pointer='-->'] point at target line
+ * @property {number} [defaultDepth=1] depth to report at if non specified
  */
 
 /**
@@ -43,9 +44,9 @@ const _CodeLocator = () => {
   const isGas = Reflect.has(globalThis, 'ScriptApp') && typeof ScriptApp.getResource === 'function'
 
   // if there are multiple GAS libraries then a scriptId will be needed to distinguish files with the same name in cache
-  
-  let _scriptId ='default'
-  
+
+  let _scriptId = 'default'
+
   // this section is only needed for apps script when code-locator is being used in a library
   // because the library doesnt have access to the callers code
   // all this is ignored on Node
@@ -64,7 +65,7 @@ const _CodeLocator = () => {
     _scriptId = scriptId
     return getScriptId
   }
-  
+
   /**
    * set a function to get code from the callers script file because an Apps Script library doesnt have access to its callers code normally
    * @param {function} getResource this will always be ScriptApp.getResource 
@@ -85,7 +86,7 @@ const _CodeLocator = () => {
   /**
    * @returns {string} the callers scriptid if it was provided, otherwise 'default'
    */
-  const getScriptId = () => _scriptId 
+  const getScriptId = () => _scriptId
   //--------------------
 
   // the code is cached to avoide multiple fetching
@@ -97,7 +98,7 @@ const _CodeLocator = () => {
    * @returns {CodeContent[]} the code from the filename
    */
   const getCodeContent = (fileName) => {
-    const key =`${getScriptId}-${fileName}`
+    const key = `${getScriptId}-${fileName}`
     if (!codeCache.has(key)) {
       // save as an array of lines
       const code = fetchResource(fileName).split("\n").map((text, i) => ({
@@ -120,7 +121,7 @@ const _CodeLocator = () => {
       if (isGas) {
         // if we're in gas, we should have had the scriptresource set
         if (!getGetResource()) {
-          console.log ('...cant get code from an apps script library\n...from your main script,call CodeLocator.setGetResource(ScriptApp.getResource')
+          console.log('...cant get code from an apps script library\n...from your main script,call CodeLocator.setGetResource(ScriptApp.getResource)')
           return ''
         }
         const blob = getGetResource()(fileName)
@@ -173,7 +174,8 @@ const _CodeLocator = () => {
     showLineNumber: true,
     brief: false,
     lineNumberWidth: 4,
-    pointer: '--> '
+    pointer: '-->',
+    defaultDepth: 1
   })
 
   /**
@@ -214,11 +216,6 @@ const _CodeLocator = () => {
    * @return {string} the formatted line(s)
    */
   const formatter = (location, options = {}) => {
-    options = checkFormatOptions({
-      ..._defaultFormatOptions,
-      ..._formatOptions,
-      ...options
-    })
 
     // mask for line number fixed width
     const mask = " ".repeat(options.lineNumberWidth)
@@ -241,8 +238,8 @@ const _CodeLocator = () => {
     const alignLineNumber = (lineNumber) => (mask + lineNumber).slice(-mask.length) + ':'
 
     if (!codeLines.length) {
-      text.push (`${alignLineNumber(targetLine)} ${options.pointer} No code available`)
-      return text.join (" ")
+      text.push(`${alignLineNumber(targetLine)} ${options.pointer} No code available`)
+      return text.join(" ")
     }
     return text.concat(codeLines.map(f => {
       const ltext = []
@@ -256,37 +253,56 @@ const _CodeLocator = () => {
 
   }
 
+  const decorateOptions = (depth, options) => {
+
+    options = checkFormatOptions({
+      ..._defaultFormatOptions,
+      ..._formatOptions,
+      ...options
+    })
+
+    if (depth === null || typeof depth === typeof undefined) depth = options.defaultDepth
+    return {
+      options,
+      depth
+    }
+
+  }
+
   /**
    * get code at a given depth in the stack
-   * @param {number} [depth=1] depth 0 is the call to getCode, 1 would be who called it's parent function
+   * @param {number} [depth] depth 0 is the call to getCode, 1 would be who called it's parent function. default comes from options
    * @param {CodeLocationFormatOptions} [options={}] formatting options
    * @return {CodeReport}
    */
-  const getCode = (depth = 1, options) => {
+  const getCode = (depth, options) => {
+
+    const {options: dOptions, depth: dDepth } = decorateOptions (depth, options)
+
     const locations = getLocations()
-    const location = locations[depth + 1]
+    const location = locations[dDepth + 1]
     if (!location) return {
       location: null,
-      formatted: `Couldn't find location at depth ${depth}`,
+      formatted: `Couldn't find location at depth ${dDepth}`,
     }
 
     return {
       location,
-      formatted: formatter(location, options)
+      formatted: formatter(location, dOptions)
     }
   }
 
   /**
    * get code at a given depth in the stack and log it
-   * @param {number} [depth=1] depth 0 is the call to getCode, 1 would be who called it's parent function
+   * @param {number} [depth] depth 0 is the call to getCode, 1 would be who called it's parent function
    * @param {CodeLocationFormatOptions} [options={}] formatting options
    * @return {CodeReport}
    */
-  const whoCalled = (depth = 1, options) => {
-    // because this counts as 1
-    const report = getCode(depth + 1, options)
+  const whoCalled = (depth, options) => {
+    const {options: dOptions, depth: dDepth } = decorateOptions (depth, options)
+    const report = getCode(dDepth + 1, dOptions)
     console.info(report.formatted)
-    return report 
+    return report
   }
 
   return {
