@@ -122,7 +122,7 @@ This only applies to Apps Script. Ignored in Node.
 
 To retrieve the code for a script file, we use the (undocumented) ScriptApp.getResource function, which can only access code in its own project script. Since CodeLocator is implemented as a library, you need to pass a function it can use to retrieve code from your script.
 
-After importing CodeLocator, but before doing anything else, you'll need to do this if you want to return the code associated with a line in your own script. This is optional - without it will still report the line number and file name info, but won't be able to reproduce the underlying code.
+After importing CodeLocator, but before doing anything else, you'll need to do this if you want to return the code associated with a line in your own script.  This is optional - without it will still report the line number and file name info, but won't be able to reproduce the underlying code.
 
 ```
 CodeLocator.setGetResource (getResourceFunction)
